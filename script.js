@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentX = 0;
     let currentY = 0;
     let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
 
     // SVG dimensions
     const svgWidth = 1056;
@@ -16,8 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle mouse down for dragging
     svgImage.addEventListener('mousedown', (e) => {
         isDragging = true;
-        startX = e.clientX - currentX;
-        startY = e.clientY - currentY;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
     });
@@ -25,9 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle mouse move for dragging
     function onMouseMove(e) {
         if (isDragging) {
-            currentX = e.clientX - startX;
-            currentY = e.clientY - startY;
+            const dx = e.clientX - dragStartX;
+            const dy = e.clientY - dragStartY;
+            currentX += dx;
+            currentY += dy;
             svgImage.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
             updateCoordinates(e);
             updateCrosshair();
         }
@@ -44,7 +50,18 @@ document.addEventListener('DOMContentLoaded', () => {
     svgImage.addEventListener('wheel', (e) => {
         e.preventDefault();
         const zoomFactor = 1.1;
-        scale *= e.deltaY < 0 ? zoomFactor : 1 / zoomFactor;
+        const rect = svgImage.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const newScale = e.deltaY < 0 ? scale * zoomFactor : scale / zoomFactor;
+
+        // Calculate the new translate values to zoom towards the mouse position
+        const scaleRatio = newScale / scale;
+        currentX -= (mouseX * scaleRatio - mouseX) * scale;
+        currentY -= (mouseY * scaleRatio - mouseY) * scale;
+
+        scale = newScale;
         svgImage.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
         updateCrosshair();
     });
