@@ -50,9 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCoordinates(e) {
         const rect = svgImage.getBoundingClientRect();
 
-        // Calculate mouse position relative to the SVG image
-        const svgX = (e.clientX - rect.left - currentX) / scale;
-        const svgY = (e.clientY - rect.top - currentY) / scale;
+        // Calculate mouse position relative to the SVG container
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        // Calculate the position within the SVG coordinate system
+        const svgX = (mouseX - currentX) / scale;
+        const svgY = (mouseY - currentY) / scale;
 
         // Ensure coordinates stay within the SVG bounds
         const x = Math.max(0, Math.min(svgWidth, svgX));
