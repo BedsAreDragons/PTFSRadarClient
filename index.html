@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full-Page SVG Overlay</title>
+    <title>Interactive SVG Overlay</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- SVG Overlay -->
-    <div class="svg-overlay">
-        <img src="Enroute-Chart-Viewing-_1_.svg" alt="Overlay SVG">
+    <div class="svg-container">
+        <div class="svg-overlay">
+            <img id="svg-image" src="Enroute-Chart-Viewing-_1_.svg" alt="Overlay SVG">
+        </div>
+        <!-- Coordinates Box -->
+        <div id="coordinates-box" class="coordinates-box">X: 0, Y: 0</div>
     </div>
 
     <!-- Main Content -->
@@ -17,5 +21,7 @@
         <h1>Your Main Content Here</h1>
         <!-- Add other content here -->
     </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
