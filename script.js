@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const svgImage = document.getElementById('svg-image');
     const coordinatesBox = document.getElementById('coordinates-box');
+    const crosshair = document.getElementById('crosshair');
     let scale = 1;
     let startX = 0;
     let startY = 0;
@@ -28,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentY = e.clientY - startY;
             svgImage.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
             updateCoordinates(e);
+            updateCrosshair();
         }
     }
 
@@ -44,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const zoomFactor = 1.1;
         scale *= e.deltaY < 0 ? zoomFactor : 1 / zoomFactor;
         svgImage.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
+        updateCrosshair();
     });
 
     // Update coordinates box with position relative to the SVG dimensions
@@ -65,4 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update the coordinates box
         coordinatesBox.textContent = `X: ${Math.round(x)}, Y: ${Math.round(y)}`;
     }
+
+    // Update the crosshair position
+    function updateCrosshair() {
+        const svgRect = svgImage.getBoundingClientRect();
+        crosshair.style.left = `${(svgRect.width / 2) + svgRect.left}px`;
+        crosshair.style.top = `${(svgRect.height / 2) + svgRect.top}px`;
+    }
+
+    // Initial update
+    updateCrosshair();
 });
