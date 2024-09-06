@@ -3,28 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive SVG Overlay</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Interactive SVG Map</title>
+    <style>
+        #map {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        svg {
+            width: 100%;
+            height: auto;
+            cursor: grab;
+        }
+        svg:active {
+            cursor: grabbing;
+        }
+    </style>
 </head>
 <body>
-    <!-- SVG Container -->
-    <div class="svg-container">
-        <!-- SVG Overlay -->
-        <div class="svg-overlay">
-            <img id="svg-image" src="Enroute-Chart-Viewing-_1_.svg" alt="Overlay SVG">
-        </div>
-        <!-- Coordinates Box -->
-        <div id="coordinates-box" class="coordinates-box">X: 0, Y: 0</div>
-        <!-- Crosshair -->
-        <div id="crosshair" class="crosshair"></div>
+    <div id="map">
+        <!-- Your SVG code here -->
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- SVG content -->
+            <circle cx="50" cy="50" r="20" fill="blue" />
+            <rect x="70" y="20" width="20" height="20" fill="red" />
+        </svg>
     </div>
-
-    <!-- Main Content -->
-    <div class="content">
-        <h1>Your Main Content Here</h1>
-        <!-- Add other content here -->
-    </div>
-
-    <script src="script.js"></script>
+    <script>
+        // JavaScript for interactivity will go here
+    </script>
 </body>
 </html>
