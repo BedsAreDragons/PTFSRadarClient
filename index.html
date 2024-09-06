@@ -8,16 +8,18 @@
         #map {
             cursor: grab;
             transition: transform 0.1s;
+            position: absolute; /* Ensure positioning is controlled by JavaScript */
         }
         #map:active {
             cursor: grabbing;
         }
         #svg-container {
-            overflow: hidden; /* Optional: Prevent scrollbars if the SVG is large */
+            overflow: hidden; /* Prevent scrollbars if the SVG is large */
             width: 100vw;
             height: 100vh;
             border: 1px solid black; /* Optional: To visualize the container */
             position: relative;
+            background-color: #f0f0f0; /* Optional: To visualize the container */
         }
         #coordinates {
             position: fixed;
@@ -28,6 +30,7 @@
             padding: 5px;
             border-radius: 5px;
             font-size: 14px;
+            pointer-events: none; /* Ensure the coordinates box does not interfere with mouse events */
         }
     </style>
 </head>
@@ -51,6 +54,7 @@
         function makeDraggable() {
             const map = document.getElementById('map');
             const coordinatesDisplay = document.getElementById('coordinates');
+            const container = document.getElementById('svg-container');
             let isDragging = false;
             let startX, startY, initialTransform;
 
@@ -63,7 +67,11 @@
             });
 
             document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
+                if (!isDragging) {
+                    // Update coordinates display even when not dragging
+                    coordinatesDisplay.textContent = `X: ${e.clientX}, Y: ${e.clientY}`;
+                    return;
+                }
 
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
@@ -74,8 +82,20 @@
                 const currentY = match ? parseFloat(match[2]) : 0;
 
                 // Calculate new position
-                const newX = currentX + dx;
-                const newY = currentY + dy;
+                let newX = currentX + dx;
+                let newY = currentY + dy;
+
+                // Get container dimensions
+                const containerRect = container.getBoundingClientRect();
+                const mapRect = map.getBoundingClientRect();
+
+                // Calculate bounds
+                const maxX = containerRect.width - mapRect.width;
+                const maxY = containerRect.height - mapRect.height;
+
+                // Restrict movement within the container bounds
+                newX = Math.max(Math.min(newX, 0), maxX);
+                newY = Math.max(Math.min(newY, 0), maxY);
 
                 map.style.transform = `translate(${newX}px, ${newY}px)`;
 
