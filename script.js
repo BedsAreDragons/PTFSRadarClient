@@ -1,4 +1,3 @@
-// JavaScript for zooming, panning, and coordinates
 document.addEventListener('DOMContentLoaded', () => {
     const svgImage = document.getElementById('svg-image');
     const coordinatesBox = document.getElementById('coordinates-box');
@@ -8,6 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentX = 0;
     let currentY = 0;
     let isDragging = false;
+
+    // SVG dimensions
+    const svgWidth = 1056;
+    const svgHeight = 816;
 
     // Handle mouse down for dragging
     svgImage.addEventListener('mousedown', (e) => {
@@ -43,11 +46,19 @@ document.addEventListener('DOMContentLoaded', () => {
         svgImage.style.transform = `translate(${currentX}px, ${currentY}px) scale(${scale})`;
     });
 
-    // Update coordinates box
+    // Update coordinates box with position relative to the SVG dimensions
     function updateCoordinates(e) {
         const rect = svgImage.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+
+        // Calculate mouse position relative to the SVG image
+        const svgX = (e.clientX - rect.left - currentX) / scale;
+        const svgY = (e.clientY - rect.top - currentY) / scale;
+
+        // Ensure coordinates stay within the SVG bounds
+        const x = Math.max(0, Math.min(svgWidth, svgX));
+        const y = Math.max(0, Math.min(svgHeight, svgY));
+
+        // Update the coordinates box
         coordinatesBox.textContent = `X: ${Math.round(x)}, Y: ${Math.round(y)}`;
     }
 });
