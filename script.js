@@ -17,11 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Handle mouse down for dragging
     svgImage.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        dragStartX = e.clientX;
-        dragStartY = e.clientY;
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
+        if (e.button === 0) { // Only proceed if the left mouse button is pressed
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        }
     });
 
     // Handle mouse move for dragging
