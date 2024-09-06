@@ -68,8 +68,13 @@
 
             document.addEventListener('mousemove', (e) => {
                 if (!isDragging) {
-                    // Update coordinates display even when not dragging
-                    coordinatesDisplay.textContent = `X: ${e.clientX}, Y: ${e.clientY}`;
+                    // Calculate mouse position relative to SVG
+                    const svgRect = map.getBoundingClientRect();
+                    const svgX = e.clientX - svgRect.left;
+                    const svgY = e.clientY - svgRect.top;
+
+                    // Update coordinates display
+                    coordinatesDisplay.textContent = `SVG X: ${svgX.toFixed(2)}, SVG Y: ${svgY.toFixed(2)}`;
                     return;
                 }
 
@@ -99,8 +104,12 @@
 
                 map.style.transform = `translate(${newX}px, ${newY}px)`;
 
-                // Update mouse coordinates display
-                coordinatesDisplay.textContent = `X: ${e.clientX}, Y: ${e.clientY}`;
+                // Update mouse coordinates display relative to SVG
+                const svgRect = map.getBoundingClientRect();
+                const svgX = e.clientX - svgRect.left - (newX - currentX);
+                const svgY = e.clientY - svgRect.top - (newY - currentY);
+
+                coordinatesDisplay.textContent = `SVG X: ${svgX.toFixed(2)}, SVG Y: ${svgY.toFixed(2)}`;
 
                 // Update start position for next move event
                 startX = e.clientX;
