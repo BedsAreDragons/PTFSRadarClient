@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zoomable SVG with Mouse Coordinates</title>
+    <title>Zoomable and Draggable SVG with Mouse Coordinates</title>
     <style>
         #svg-container {
             width: 100vw;
@@ -49,44 +49,96 @@
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('map').innerHTML = data;
-                    setupMouseTrackingAndZoom();
+                    setupInteractions();
                 })
                 .catch(error => console.error('Error loading SVG:', error));
         }
 
-        function setupMouseTrackingAndZoom() {
+        function setupInteractions() {
             const map = document.getElementById('map');
             const coordinatesDisplay = document.getElementById('coordinates');
+            const container = document.getElementById('svg-container');
+            let isDragging = false;
+            let startX, startY;
             let scale = 1;
             const scaleFactor = 1.1; // Zoom factor for each scroll step
+            let currentTransform = 'translate(0px, 0px) scale(1)'; // Track the current transform
 
-            // Handle mouse movement to update coordinates
-            map.addEventListener('mousemove', (e) => {
+            // Mouse down event for dragging
+            map.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                map.style.transition = 'none'; // Disable transition during drag
+            });
+
+            // Mouse move event for dragging
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+
+                    // Extract current translation values and scale from the transform string
+                    const match = currentTransform.match(/translate\(([^,]+),\s*([^}]+)\)\s*scale\(([^)]+)\)/);
+                    const currentX = match ? parseFloat(match[1]) : 0;
+                    const currentY = match ? parseFloat(match[2]) : 0;
+                    const currentScale = match ? parseFloat(match[3]) : 1;
+
+                    // Calculate new position
+                    let newX = currentX + dx / currentScale;
+                    let newY = currentY + dy / currentScale;
+
+                    // Calculate bounds to prevent scrolling out of view
+                    const containerRect = container.getBoundingClientRect();
+                    const mapRect = map.getBoundingClientRect();
+                    const maxX = containerRect.width / currentScale - mapRect.width / currentScale;
+                    const maxY = containerRect.height / currentScale - mapRect.height / currentScale;
+
+                    // Restrict movement within the container bounds
+                    newX = Math.max(Math.min(newX, 0), maxX);
+                    newY = Math.max(Math.min(newY, 0), maxY);
+
+                    // Update transform
+                    currentTransform = `translate(${newX}px, ${newY}px) scale(${currentScale})`;
+                    map.style.transform = currentTransform;
+
+                    // Update start position for next move event
+                    startX = e.clientX;
+                    startY = e.clientY;
+                }
+
+                // Update coordinates display relative to SVG
                 const svgRect = map.getBoundingClientRect();
                 const svgX = (e.clientX - svgRect.left) / scale;
                 const svgY = (e.clientY - svgRect.top) / scale;
 
-                // Update coordinates display
                 coordinatesDisplay.textContent = `SVG X: ${svgX.toFixed(2)}, SVG Y: ${svgY.toFixed(2)}`;
             });
 
-            // Handle zoom with scroll wheel
-            document.getElementById('svg-container').addEventListener('wheel', (e) => {
+            // Mouse up event to stop dragging
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    map.style.transition = 'transform 0.1s'; // Re-enable transition
+                }
+            });
+
+            // Zoom with scroll wheel
+            container.addEventListener('wheel', (e) => {
                 e.preventDefault(); // Prevent default scrolling behavior
 
                 // Calculate new scale
                 const delta = e.deltaY < 0 ? scaleFactor : 1 / scaleFactor;
                 scale = Math.min(Math.max(scale * delta, 0.1), 10); // Set zoom limits
 
-                // Adjust the transform
-                map.style.transform = `scale(${scale})`;
+                // Update transform
+                const translateMatch = currentTransform.match(/translate\(([^,]+),\s*([^}]+)\)/);
+                const currentTranslateX = translateMatch ? parseFloat(translateMatch[1]) : 0;
+                const currentTranslateY = translateMatch ? parseFloat(translateMatch[2]) : 0;
 
-                // Center the SVG in the container after scaling
-                const containerRect = document.getElementById('svg-container').getBoundingClientRect();
-                const mapRect = map.getBoundingClientRect();
-                const centerX = (containerRect.width - mapRect.width * scale) / 2;
-                const centerY = (containerRect.height - mapRect.height * scale) / 2;
-                map.style.transform = `translate(${centerX}px, ${centerY}px) scale(${scale})`;
+                // Adjust the transform
+                currentTransform = `translate(${currentTranslateX}px, ${currentTranslateY}px) scale(${scale})`;
+                map.style.transform = currentTransform;
             });
         }
 
