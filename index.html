@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Draggable SVG</title>
+    <title>Draggable SVG with Mouse Coordinates</title>
     <style>
         #map {
             cursor: grab;
@@ -17,16 +17,27 @@
             width: 100vw;
             height: 100vh;
             border: 1px solid black; /* Optional: To visualize the container */
+            position: relative;
+        }
+        #coordinates {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <div id="svg-container">
         <div id="map"></div>
+        <div id="coordinates">X: 0, Y: 0</div>
     </div>
 
     <script>
-        // Function to load SVG content
         function loadSVG() {
             fetch('map.svg')
                 .then(response => response.text())
@@ -37,9 +48,9 @@
                 .catch(error => console.error('Error loading SVG:', error));
         }
 
-        // Function to make SVG draggable
         function makeDraggable() {
             const map = document.getElementById('map');
+            const coordinatesDisplay = document.getElementById('coordinates');
             let isDragging = false;
             let startX, startY, initialTransform;
 
@@ -67,6 +78,9 @@
                 const newY = currentY + dy;
 
                 map.style.transform = `translate(${newX}px, ${newY}px)`;
+
+                // Update mouse coordinates display
+                coordinatesDisplay.textContent = `X: ${e.clientX}, Y: ${e.clientY}`;
 
                 // Update start position for next move event
                 startX = e.clientX;
