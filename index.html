@@ -37,7 +37,7 @@
 <body>
     <div id="svg-container">
         <div id="map"></div>
-        <div id="coordinates">X: 0, Y: 0</div>
+        <div id="coordinates">SVG X: 0, SVG Y: 0</div>
     </div>
 
     <script>
@@ -67,53 +67,45 @@
             });
 
             document.addEventListener('mousemove', (e) => {
-                if (!isDragging) {
-                    // Calculate mouse position relative to SVG
-                    const svgRect = map.getBoundingClientRect();
-                    const svgX = e.clientX - svgRect.left;
-                    const svgY = e.clientY - svgRect.top;
+                if (isDragging) {
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
 
-                    // Update coordinates display
-                    coordinatesDisplay.textContent = `SVG X: ${svgX.toFixed(2)}, SVG Y: ${svgY.toFixed(2)}`;
-                    return;
+                    // Extract current translation values
+                    const match = map.style.transform.match(/translate\(([^,]+),\s*([^}]+)\)/);
+                    const currentX = match ? parseFloat(match[1]) : 0;
+                    const currentY = match ? parseFloat(match[2]) : 0;
+
+                    // Calculate new position
+                    let newX = currentX + dx;
+                    let newY = currentY + dy;
+
+                    // Get container dimensions
+                    const containerRect = container.getBoundingClientRect();
+                    const mapRect = map.getBoundingClientRect();
+
+                    // Calculate bounds
+                    const maxX = containerRect.width - mapRect.width;
+                    const maxY = containerRect.height - mapRect.height;
+
+                    // Restrict movement within the container bounds
+                    newX = Math.max(Math.min(newX, 0), maxX);
+                    newY = Math.max(Math.min(newY, 0), maxY);
+
+                    map.style.transform = `translate(${newX}px, ${newY}px)`;
+
+                    // Update start position for next move event
+                    startX = e.clientX;
+                    startY = e.clientY;
                 }
 
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-
-                // Extract current translation values
-                const match = map.style.transform.match(/translate\(([^,]+),\s*([^}]+)\)/);
-                const currentX = match ? parseFloat(match[1]) : 0;
-                const currentY = match ? parseFloat(match[2]) : 0;
-
-                // Calculate new position
-                let newX = currentX + dx;
-                let newY = currentY + dy;
-
-                // Get container dimensions
-                const containerRect = container.getBoundingClientRect();
-                const mapRect = map.getBoundingClientRect();
-
-                // Calculate bounds
-                const maxX = containerRect.width - mapRect.width;
-                const maxY = containerRect.height - mapRect.height;
-
-                // Restrict movement within the container bounds
-                newX = Math.max(Math.min(newX, 0), maxX);
-                newY = Math.max(Math.min(newY, 0), maxY);
-
-                map.style.transform = `translate(${newX}px, ${newY}px)`;
-
-                // Update mouse coordinates display relative to SVG
+                // Calculate mouse position relative to SVG
                 const svgRect = map.getBoundingClientRect();
-                const svgX = e.clientX - svgRect.left - (newX - currentX);
-                const svgY = e.clientY - svgRect.top - (newY - currentY);
+                const svgX = e.clientX - svgRect.left - (parseFloat(map.style.transform.match(/translate\(([^,]+),\s*([^}]+)\)/)?.[1] || 0));
+                const svgY = e.clientY - svgRect.top - (parseFloat(map.style.transform.match(/translate\(([^,]+),\s*([^}]+)\)/)?.[2] || 0));
 
+                // Update coordinates display
                 coordinatesDisplay.textContent = `SVG X: ${svgX.toFixed(2)}, SVG Y: ${svgY.toFixed(2)}`;
-
-                // Update start position for next move event
-                startX = e.clientX;
-                startY = e.clientY;
             });
 
             document.addEventListener('mouseup', () => {
