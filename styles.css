@@ -1,0 +1,30 @@
+/* Set background color for the entire page */
+body {
+    margin: 0;
+    height: 100vh;
+    background-color: #d3ebfc; /* Your background color */
+    overflow: hidden; /* Prevents scrolling if SVG is larger than viewport */
+    position: relative; /* Ensures positioning of SVG overlay */
+}
+
+/* Style the SVG to cover the entire viewport */
+.svg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1; /* Ensure SVG is on top */
+}
+
+/* Style the content to be positioned below the SVG */
+.content {
+    position: relative;
+    z-index: 0; /* Ensure content is below SVG */
+    color: white; /* Optional: Adjust text color for visibility */
+    text-align: center; /* Optional: Center-align text */
+    padding: 20px; /* Optional: Add some padding */
+}
