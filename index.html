@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Draggable SVG with Mouse Coordinates</title>
+    <title>Zoomable and Draggable SVG with Coordinates</title>
     <style>
         #map {
             cursor: grab;
@@ -32,12 +32,26 @@
             font-size: 14px;
             pointer-events: none; /* Ensure the coordinates box does not interfere with mouse events */
         }
+        #zoom-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
     <div id="svg-container">
         <div id="map"></div>
         <div id="coordinates">SVG X: 0, SVG Y: 0</div>
+        <div id="zoom-controls">
+            <button id="zoom-in">Zoom In</button>
+            <button id="zoom-out">Zoom Out</button>
+        </div>
     </div>
 
     <script>
@@ -55,14 +69,17 @@
             const map = document.getElementById('map');
             const coordinatesDisplay = document.getElementById('coordinates');
             const container = document.getElementById('svg-container');
+            const zoomInButton = document.getElementById('zoom-in');
+            const zoomOutButton = document.getElementById('zoom-out');
             let isDragging = false;
             let startX, startY, initialTransform;
+            let scale = 1;
 
             map.addEventListener('mousedown', (e) => {
                 isDragging = true;
                 startX = e.clientX;
                 startY = e.clientY;
-                initialTransform = map.style.transform || 'translate(0px, 0px)';
+                initialTransform = map.style.transform || 'translate(0px, 0px) scale(1)';
                 map.style.transition = 'none'; // Disable transition during drag
             });
 
@@ -71,28 +88,29 @@
                     const dx = e.clientX - startX;
                     const dy = e.clientY - startY;
 
-                    // Extract current translation values
-                    const match = map.style.transform.match(/translate\(([^,]+),\s*([^}]+)\)/);
+                    // Extract current translation values and scale
+                    const match = map.style.transform.match(/translate\(([^,]+),\s*([^}]+)\)\s*scale\(([^)]+)\)/);
                     const currentX = match ? parseFloat(match[1]) : 0;
                     const currentY = match ? parseFloat(match[2]) : 0;
+                    const currentScale = match ? parseFloat(match[3]) : 1;
 
                     // Calculate new position
-                    let newX = currentX + dx;
-                    let newY = currentY + dy;
+                    let newX = currentX + dx / currentScale;
+                    let newY = currentY + dy / currentScale;
 
                     // Get container dimensions
                     const containerRect = container.getBoundingClientRect();
                     const mapRect = map.getBoundingClientRect();
 
                     // Calculate bounds
-                    const maxX = containerRect.width - mapRect.width;
-                    const maxY = containerRect.height - mapRect.height;
+                    const maxX = containerRect.width / currentScale - mapRect.width / currentScale;
+                    const maxY = containerRect.height / currentScale - mapRect.height / currentScale;
 
                     // Restrict movement within the container bounds
                     newX = Math.max(Math.min(newX, 0), maxX);
                     newY = Math.max(Math.min(newY, 0), maxY);
 
-                    map.style.transform = `translate(${newX}px, ${newY}px)`;
+                    map.style.transform = `translate(${newX}px, ${newY}px) scale(${currentScale})`;
 
                     // Update start position for next move event
                     startX = e.clientX;
@@ -101,8 +119,8 @@
 
                 // Calculate mouse position relative to SVG
                 const svgRect = map.getBoundingClientRect();
-                const svgX = e.clientX - svgRect.left - (parseFloat(map.style.transform.match(/translate\(([^,]+),\s*([^}]+)\)/)?.[1] || 0));
-                const svgY = e.clientY - svgRect.top - (parseFloat(map.style.transform.match(/translate\(([^,]+),\s*([^}]+)\)/)?.[2] || 0));
+                const svgX = (e.clientX - svgRect.left) / scale;
+                const svgY = (e.clientY - svgRect.top) / scale;
 
                 // Update coordinates display
                 coordinatesDisplay.textContent = `SVG X: ${svgX.toFixed(2)}, SVG Y: ${svgY.toFixed(2)}`;
@@ -113,6 +131,17 @@
                     isDragging = false;
                     map.style.transition = 'transform 0.1s'; // Re-enable transition
                 }
+            });
+
+            // Zoom controls
+            zoomInButton.addEventListener('click', () => {
+                scale = Math.min(scale * 1.2, 5); // Max zoom level
+                map.style.transform = `translate(${map.style.transform.match(/translate\(([^,]+),\s*([^}]+)\)/)?.[0] || 'translate(0px, 0px)'} ) scale(${scale})`;
+            });
+
+            zoomOutButton.addEventListener('click', () => {
+                scale = Math.max(scale / 1.2, 0.2); // Min zoom level
+                map.style.transform = `translate(${map.style.transform.match(/translate\(([^,]+),\s*([^}]+)\)/)?.[0] || 'translate(0px, 0px)'} ) scale(${scale})`;
             });
         }
 
