@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zoomable and Draggable SVG with Mouse Coordinates</title>
     <style>
+        body {
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars */
+        }
         #svg-container {
             width: 100vw;
             height: 100vh;
@@ -12,15 +16,16 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden; /* Prevent scrollbars */
-            background-color: #f0f0f0; /* Optional: For better visibility */
-            border: 1px solid black; /* Optional: To visualize the container */
+            overflow: hidden;
+            background-color: #f0f0f0;
+            border: 1px solid black;
         }
         #map {
             position: absolute;
             top: 0;
             left: 0;
             transform-origin: 0 0; /* Ensure scaling happens from the top-left corner */
+            cursor: grab; /* Indicate draggable area */
         }
         #coordinates {
             position: fixed;
@@ -31,7 +36,7 @@
             padding: 5px;
             border-radius: 5px;
             font-size: 14px;
-            pointer-events: none; /* Ensure the coordinates box does not interfere with mouse events */
+            pointer-events: none;
         }
     </style>
 </head>
@@ -61,15 +66,15 @@
             let isDragging = false;
             let startX, startY;
             let scale = 1;
-            const scaleFactor = 1.1; // Zoom factor for each scroll step
-            let currentTransform = 'translate(0px, 0px) scale(1)'; // Track the current transform
+            let originX = 0;
+            let originY = 0;
 
             // Mouse down event for dragging
             map.addEventListener('mousedown', (e) => {
                 isDragging = true;
                 startX = e.clientX;
                 startY = e.clientY;
-                map.style.transition = 'none'; // Disable transition during drag
+                map.style.cursor = 'grabbing';
             });
 
             // Mouse move event for dragging
@@ -77,32 +82,9 @@
                 if (isDragging) {
                     const dx = e.clientX - startX;
                     const dy = e.clientY - startY;
-
-                    // Extract current translation values and scale from the transform string
-                    const match = currentTransform.match(/translate\(([^,]+),\s*([^}]+)\)\s*scale\(([^)]+)\)/);
-                    const currentX = match ? parseFloat(match[1]) : 0;
-                    const currentY = match ? parseFloat(match[2]) : 0;
-                    const currentScale = match ? parseFloat(match[3]) : 1;
-
-                    // Calculate new position
-                    let newX = currentX + dx / currentScale;
-                    let newY = currentY + dy / currentScale;
-
-                    // Calculate bounds to prevent scrolling out of view
-                    const containerRect = container.getBoundingClientRect();
-                    const mapRect = map.getBoundingClientRect();
-                    const maxX = containerRect.width / currentScale - mapRect.width / currentScale;
-                    const maxY = containerRect.height / currentScale - mapRect.height / currentScale;
-
-                    // Restrict movement within the container bounds
-                    newX = Math.max(Math.min(newX, 0), maxX);
-                    newY = Math.max(Math.min(newY, 0), maxY);
-
-                    // Update transform
-                    currentTransform = `translate(${newX}px, ${newY}px) scale(${currentScale})`;
-                    map.style.transform = currentTransform;
-
-                    // Update start position for next move event
+                    originX += dx / scale;
+                    originY += dy / scale;
+                    map.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
                     startX = e.clientX;
                     startY = e.clientY;
                 }
@@ -119,7 +101,7 @@
             document.addEventListener('mouseup', () => {
                 if (isDragging) {
                     isDragging = false;
-                    map.style.transition = 'transform 0.1s'; // Re-enable transition
+                    map.style.cursor = 'grab';
                 }
             });
 
@@ -127,18 +109,22 @@
             container.addEventListener('wheel', (e) => {
                 e.preventDefault(); // Prevent default scrolling behavior
 
-                // Calculate new scale
-                const delta = e.deltaY < 0 ? scaleFactor : 1 / scaleFactor;
-                scale = Math.min(Math.max(scale * delta, 0.1), 10); // Set zoom limits
+                const rect = map.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
 
-                // Update transform
-                const translateMatch = currentTransform.match(/translate\(([^,]+),\s*([^}]+)\)/);
-                const currentTranslateX = translateMatch ? parseFloat(translateMatch[1]) : 0;
-                const currentTranslateY = translateMatch ? parseFloat(translateMatch[2]) : 0;
+                const zoomFactor = 1.1; // Zoom factor for each scroll step
+                const delta = e.deltaY < 0 ? zoomFactor : 1 / zoomFactor;
+                scale *= delta;
 
-                // Adjust the transform
-                currentTransform = `translate(${currentTranslateX}px, ${currentTranslateY}px) scale(${scale})`;
-                map.style.transform = currentTransform;
+                // Calculate new origin to keep zoom centered around the mouse position
+                originX -= (mouseX * delta - mouseX) / scale;
+                originY -= (mouseY * delta - mouseY) / scale;
+
+                // Ensure scale is within reasonable bounds
+                scale = Math.min(Math.max(scale, 0.1), 10); // Set zoom limits
+
+                map.style.transform = `translate(${originX}px, ${originY}px) scale(${scale})`;
             });
         }
 
