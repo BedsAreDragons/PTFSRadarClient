@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>POST Request Example</title>
+  <title>Flight Data</title>
   <style>
     #response {
       margin-top: 20px;
@@ -13,41 +13,11 @@
       background-color: #f9f9f9;
     }
   </style>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      async function sendPostRequest() {
-        try {
-          const response = await fetch('https://your-render-domain/functions/fetch_flight_data', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-
-          const result = document.getElementById('response');
-
-          if (response.ok) {
-            try {
-              const data = await response.json();
-              result.textContent = JSON.stringify(data, null, 2); // Pretty-print the JSON
-            } catch (jsonError) {
-              result.textContent = `JSON Parse Error: ${jsonError.message}`;
-            }
-          } else {
-            result.textContent = `Server Error: ${response.status} ${response.statusText}`;
-          }
-        } catch (error) {
-          document.getElementById('response').textContent = `Fetch Error: ${error.message}`;
-        }
-      }
-
-      sendPostRequest();
-    });
-  </script>
+  <script src="main.js" defer></script> <!-- Link to the JS file -->
 </head>
 <body>
-  <h1>Sending POST Request</h1>
-  <p>The response from the server will be displayed below:</p>
+  <h1>Flight Data</h1>
+  <p>The response from the API will be displayed below:</p>
   <pre id="response">Loading...</pre> <!-- Placeholder for response data -->
 </body>
 </html>
