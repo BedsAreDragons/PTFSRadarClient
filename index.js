@@ -3,7 +3,7 @@
 const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
-    const apiPassword = process.env.READPASS;  // Get the password from environment variables
+    const apiPassword = "ZzhoazFwcnNlaGt6cTIyZTgzaTQ2dnp3eGFhdmhwc3IK";  // Get the password from environment variables
 
     try {
         // Send POST request to the external API
