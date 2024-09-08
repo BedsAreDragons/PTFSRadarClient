@@ -1,6 +1,6 @@
 document.getElementById('fetchData').addEventListener('click', async () => {
     const url = 'https://ptfsradar.onrender.com/get_flight_data';
-    const readapi = process.env.READPASS
+    const readapi = "ZzhoazFwcnNlaGt6cTIyZTgzaTQ2dnp3eGFhdmhwc3IK"
     const payload = { password: readapi };
     
     try {
