@@ -1,55 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>POST Request Example</title>
-  <style>
-    #response {
-      margin-top: 20px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      background-color: #f9f9f9;
-    }
-  </style>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      async function sendPostRequest() {
-        // Define the password variable
-        const password = 'your_password_here'; // Replace with your actual password or method to obtain it securely
-        
-        try {
-          const response = await fetch('https://ptfsradar.onrender.com/get_flight_data/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              password: password
-            })
-          });
-
-          const result = document.getElementById('response');
-
-          if (response.ok) {
-            const data = await response.json();
-            result.textContent = JSON.stringify(data, null, 2); // Pretty-print the JSON
-          } else {
-            result.textContent = `Server Error: ${response.status} ${response.statusText}`;
-          }
-        } catch (error) {
-          document.getElementById('response').textContent = `Fetch Error: ${error.message}`;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Data Fetcher</title>
+    <style>
+        #response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
         }
-      }
-
-      sendPostRequest();
-    });
-  </script>
+    </style>
 </head>
 <body>
-  <h1>Sending POST Request</h1>
-  <p>The response from the server will be displayed below:</p>
-  <pre id="response">Loading...</pre> <!-- Placeholder for response data -->
+    <h1>Fetch Flight Data</h1>
+    <button id="fetchDataButton">Fetch Flight Data</button>
+    <pre id="response">Loading...</pre>
+    <script src="config.js"></script>
+    <script>
+        document.getElementById('fetchDataButton').addEventListener('click', async () => {
+            try {
+                const password = getApiPassword();  // Retrieve the password from config.js
+
+                const response = await fetch('https://ptfsradar.onrender.com/get_flight_data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        password: password
+                    })
+                });
+
+                const result = document.getElementById('response');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    result.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    result.textContent = `Error: ${response.status} ${response.statusText}`;
+                }
+            } catch (error) {
+                document.getElementById('response').textContent = `Fetch Error: ${error.message}`;
+            }
+        });
+    </script>
 </body>
 </html>
