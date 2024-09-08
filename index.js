@@ -2,10 +2,11 @@
 const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
-    // Your sensitive data should be stored in environment variables
+    // Get sensitive data from environment variables
     const apiread = process.env.READPASS;
 
     try {
+        // Make the POST request to the external API
         const response = await fetch('https://ptfsradar.onrender.com/get_flight_data/', {
             method: 'POST',
             headers: {
@@ -14,13 +15,19 @@ exports.handler = async (event) => {
             body: JSON.stringify({ password: apiread })
         });
 
-        // Ensure the response is valid JSON
-        const data = await response.json();
-
-        return {
-            statusCode: response.status,
-            body: JSON.stringify(data)
-        };
+        // Check if the response is okay and parse JSON
+        if (response.ok) {
+            const data = await response.json();
+            return {
+                statusCode: 200,
+                body: JSON.stringify(data)
+            };
+        } else {
+            return {
+                statusCode: response.status,
+                body: JSON.stringify({ error: 'API request failed', statusText: response.statusText })
+            };
+        }
     } catch (error) {
         return {
             statusCode: 500,
