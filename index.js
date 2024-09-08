@@ -1,36 +1,31 @@
-// functions/fetch_flight_data.js
-
-const fetch = require('node-fetch');
-
-exports.handler = async (event) => {
-    const apiPassword = "ZzhoazFwcnNlaGt6cTIyZTgzaTQ2dnp3eGFhdmhwc3IK";  // Get the password from environment variables
-
+document.getElementById('fetchData').addEventListener('click', async () => {
+    const url = 'https://ptfsradar.onrender.com/get_flight_data';
+    const readapi = process.env.READPASS
+    const payload = { password: readapi };
+    
     try {
-        // Send POST request to the external API
-        const response = await fetch('https://ptfsradar.onrender.com/get_flight_data/', {
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ password: apiPassword })
+            body: JSON.stringify(payload)
         });
-
-        if (response.ok) {
-            const data = await response.json();
-            return {
-                statusCode: 200,
-                body: JSON.stringify(data)
-            };
-        } else {
-            return {
-                statusCode: response.status,
-                body: JSON.stringify({ error: 'API request failed', statusText: response.statusText })
-            };
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
+
+        const data = await response.json();
+        
+        // Print result in the console
+        console.log(data);
+        
+        // Or print result in the HTML page
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        
     } catch (error) {
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Internal Server Error', message: error.message })
-        };
+        console.error('Error:', error);
+        document.getElementById('result').textContent = `Error: ${error.message}`;
     }
-};
+});
