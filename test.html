@@ -1,23 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flight Data</title>
-  <style>
-    #response {
-      margin-top: 20px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      background-color: #f9f9f9;
-    }
-  </style>
-  <script src="index.js" defer></script> <!-- Link to the JS file -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Data Fetcher</title>
+    <script defer src="index.js"></script>
 </head>
 <body>
-  <h1>Flight Data</h1>
-  <p>The response from the API will be displayed below:</p>
-  <pre id="response">Loading...</pre> <!-- Placeholder for response data -->
+    <h1>Fetch Flight Data</h1>
+    <button id="fetchData">Fetch Flight Data</button>
+    <pre id="result"></pre>
 </body>
 </html>
