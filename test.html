@@ -16,18 +16,12 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       async function sendPostRequest() {
-        // Define the password variable
-        const password = 'your_password_here'; // Replace with your actual password or method to obtain it securely
-        
         try {
-          const response = await fetch('https://ptfsradar.onrender.com/get_flight_data/', {
+          const response = await fetch('/.netlify/functions/fetch_flight_data', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              password: password
-            })
+            }
           });
 
           const result = document.getElementById('response');
