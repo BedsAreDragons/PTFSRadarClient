@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POST Request via Proxy</title>
+  <style>
+    #response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      async function sendPostRequest() {
+        try {
+          const response = await fetch('https://your-serverless-function-url', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          });
+
+          const result = document.getElementById('response');
+
+          if (response.ok) {
+            const data = await response.json();
+            result.textContent = JSON.stringify(data, null, 2); // Pretty-print the JSON
+          } else {
+            result.textContent = `Error: ${response.statusText}`;
+          }
+        } catch (error) {
+          document.getElementById('response').textContent = `Fetch error: ${error}`;
+        }
+      }
+
+      sendPostRequest();
+    });
+  </script>
+</head>
+<body>
+  <h1>Sending POST Request via Proxy</h1>
+  <p>The response from the server will be displayed below:</p>
+  <pre id="response">Loading...</pre> <!-- Placeholder for response data -->
+</body>
+</html>
