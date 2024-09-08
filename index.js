@@ -1,7 +1,8 @@
-// netlify/functions/fetch_flight_data.js
+// functions/fetch_flight_data.js
 const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
+    // Your sensitive data should be stored in environment variables
     const apiread = process.env.READPASS;
 
     try {
@@ -13,7 +14,9 @@ exports.handler = async (event) => {
             body: JSON.stringify({ password: apiread })
         });
 
+        // Ensure the response is valid JSON
         const data = await response.json();
+
         return {
             statusCode: response.status,
             body: JSON.stringify(data)
@@ -21,7 +24,7 @@ exports.handler = async (event) => {
     } catch (error) {
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Internal Server Error' })
+            body: JSON.stringify({ error: 'Internal Server Error', message: error.message })
         };
     }
 };
